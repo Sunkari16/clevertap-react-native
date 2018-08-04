@@ -3,6 +3,8 @@ package com.clevertap.react;
 import android.location.Location;
 import android.util.Log;
 import android.net.Uri;
+import android.os.Bundle;
+
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -21,6 +23,7 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.clevertap.android.sdk.EventDetail;
 
 import com.clevertap.android.sdk.InAppNotificationListener;
+import com.clevertap.android.sdk.NotificationInfo;
 import com.clevertap.android.sdk.SyncListener;
 import com.clevertap.android.sdk.UTMDetail;
 
@@ -581,6 +584,24 @@ public class CleverTapModule extends ReactContextBaseJavaModule implements SyncL
         CleverTapAPI.setDebugLevel(level);
     }
 
+    @ReactMethod
+    public void onMessageReceived(ReadableMap message, Callback callback){
+
+        try {
+            if (message!=null ) {
+                Bundle extras = bundleFromReadableMap(message);
+
+                NotificationInfo info = CleverTapAPI.getNotificationInfo(extras);
+
+                if (info.fromCleverTap) {
+                    CleverTapAPI.createNotification(this.context, extras);
+                }
+            }
+            callbackWithErrorAndResult(callback, null, null);
+        } catch (Throwable t) {
+            callbackWithErrorAndResult(callback, t.getMessage(), null);
+        }
+    }
 
     // private helpers etc
 
@@ -608,6 +629,34 @@ public class CleverTapModule extends ReactContextBaseJavaModule implements SyncL
         } catch (Throwable t) {
             Log.e(TAG, t.getLocalizedMessage());
         }
+    }
+
+    private static Bundle bundleFromReadableMap(ReadableMap readableMap) throws JSONException {
+        Bundle object = new Bundle();
+        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            switch (readableMap.getType(key)) {
+                case Null:
+                    break;
+                case Boolean:
+                    object.putBoolean(key, readableMap.getBoolean(key));
+                    break;
+                case Number:
+                    object.putDouble(key, readableMap.getDouble(key));
+                    break;
+                case String:
+                    object.putString(key, readableMap.getString(key));
+                    break;
+                case Map:
+                    object.putBundle(key, bundleFromReadableMap(readableMap.getMap(key)));
+                    break;
+                case Array:
+
+                    break;
+            }
+        }
+        return object;
     }
 
     private static JSONObject jsonObjectFromReadableMap(ReadableMap readableMap) throws JSONException {

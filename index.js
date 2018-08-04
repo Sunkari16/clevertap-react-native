@@ -444,6 +444,17 @@ var CleverTap = {
     setDebugLevel: function(level) {
         CleverTapReact.setDebugLevel(level);
     }
+
+    /**
+    * expose message listener for clever tap
+    * @param message
+    * @param callback
+    */
+    onMessageReceived: function(message, callback) {
+        callback= callback||function(){};
+        CleverTapReact.onMessageReceived(message,callback);
+    }
+
 };
 
 module.exports = CleverTap;
