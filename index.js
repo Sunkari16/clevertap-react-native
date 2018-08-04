@@ -443,7 +443,7 @@ var CleverTap = {
     */
     setDebugLevel: function(level) {
         CleverTapReact.setDebugLevel(level);
-    }
+    },
 
     /**
     * expose message listener for clever tap
